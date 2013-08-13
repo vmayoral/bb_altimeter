@@ -62,7 +62,7 @@ class I2cDevice(object):
             pass #Do nothing in this case.
 
 bus = I2cBus(1)
-register = 0x00
+register = 0x0c
 print "Reading register %s" % register
 
 
