@@ -29,7 +29,9 @@ def readI2C(register):
     # confirm the warning message
     p.stdin.write('Y\n')
     #print p.stdout.read().strip()
-    return p.stdout.read().strip()
+    valor = p.stdout.read().strip()
+    p.kill()
+    return valor
 
 def writeI2C(register, value):
     """ Write a value into a register of the MPL sensor using the Linux i2c-tools.
