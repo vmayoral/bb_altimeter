@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+import rospy
+from std_msgs.msg import String
 import subprocess
 import os
 from i2ctools_python import I2C
@@ -33,46 +36,58 @@ MPL3115_OFFSET_P            ="0x2b"
 MPL3115_OFFSET_T            ="0x2c"
 MPL3115_OFFSET_H            ="0x2d"
 
-######################################
-# Check if i2c-tools are properly installed
-device = I2C()
-device.check_i2ctools()
-######################################
 
-# Set to Altimeter with an OSR = 128 
-device.writeI2C(MPL3115_CTRL_REG1, "0xB8")
-# Enable Data Flags in PT_DATA_CFG
-device.writeI2C(MPL3115_PT_DATA_CFG, "0x07")
-# Set Active (polling)
-device.writeI2C(MPL3115_CTRL_REG1, "0xB9")
+def node():
+    pub = rospy.Publisher('altimeter', String)
+    rospy.init_node('mpl2115a2')
+    device = I2C()
+    device.check_i2ctools()
 
-while 1:
-    # Read STATUS Register
-    STA = device.readI2C(MPL3115_STATUS)
-    # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
-    if STA == "":
-        print "error with the sensor"
-        break
-    if (int(STA,16) & 0x04) == 4:
-        # OUT_P
-        OUT_P_MSB = device.readI2C("0x01")
-        OUT_P_CSB = device.readI2C("0x02")
-        OUT_P_LSB = device.readI2C("0x04")
-        ## OUT_T
-        #OUT_T_MSB = readI2C(0x04)
-        #OUT_T_LSB = readI2C(0x05)
-        print OUT_P_MSB
-        print OUT_P_CSB
-        print OUT_P_LSB
+    # Set to Altimeter with an OSR = 128 
+    device.writeI2C(MPL3115_CTRL_REG1, "0xB8")
+    # Enable Data Flags in PT_DATA_CFG
+    device.writeI2C(MPL3115_PT_DATA_CFG, "0x07")
+    # Set Active (polling)
+    device.writeI2C(MPL3115_CTRL_REG1, "0xB9")
 
-        #treat the bits to get the altitude
-        signedvalue = OUT_P_MSB+OUT_P_CSB[2:]
-        fraction = OUT_P_LSB[:3]
+    while not rospy.is_shutdown():
+        # Read STATUS Register
+        STA = device.readI2C(MPL3115_STATUS)
+        # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
+        if STA == "":
+            print "error with the sensor"
+            break
+        if (int(STA,16) & 0x04) == 4:
+            # OUT_P
+            OUT_P_MSB = device.readI2C("0x01")
+            OUT_P_CSB = device.readI2C("0x02")
+            OUT_P_LSB = device.readI2C("0x04")
+            ## OUT_T
+            #OUT_T_MSB = readI2C(0x04)
+            #OUT_T_LSB = readI2C(0x05)
 
-        print int(signedvalue,16)
-        print int(fraction,16)
+            #print OUT_P_MSB
+            #print OUT_P_CSB
+            #print OUT_P_LSB
     
+            #treat the bits to get the altitude
+            signedvalue = OUT_P_MSB+OUT_P_CSB[2:]
+            fraction = OUT_P_LSB[:3]
+    
+            #print int(signedvalue,16)
+            #print int(fraction,16)
 
-    else:
-        #print "data not ready"
+            str = "signedvalue: %s" % signedvalue
+            rospy.loginfo(str)
+            pub.publish(String(str))
+
+        else:
+            #print "data not ready"
+            pass
+        rospy.sleep(1.0)
+
+if __name__ == '__main__':
+    try:
+        node()
+    except rospy.ROSInterruptException:
         pass
