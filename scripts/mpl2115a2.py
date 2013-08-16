@@ -50,6 +50,9 @@ while 1:
     # Read STATUS Register
     STA = device.readI2C(MPL3115_STATUS)
     # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
+    if STA == "":
+        print "error with the sensor"
+        break
     if (int(STA,16) & 0x04) == 4:
         # OUT_P
         OUT_P_MSB = device.readI2C("0x01")
@@ -61,8 +64,15 @@ while 1:
         print OUT_P_MSB
         print OUT_P_CSB
         print OUT_P_LSB
-    
+
         #treat the bits to get the altitude
+        signedvalue = OUT_P_MSB+OUT_P_CSB[2:]
+        fraction = OUT_P_LSB[:3]
+
+        print int(signedvalue,16)
+        print int(fraction,16)
+    
+
     else:
-        print "data not ready"
+        #print "data not ready"
         pass
