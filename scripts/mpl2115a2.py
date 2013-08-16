@@ -1,6 +1,6 @@
 import subprocess
 import os
-import i2ctools-python
+from i2ctools_python import I2C
     
 #MPL3115A register address
 MPL3115_STATUS              ="0x00"
@@ -35,32 +35,34 @@ MPL3115_OFFSET_H            ="0x2d"
 
 ######################################
 # Check if i2c-tools are properly installed
-check_i2ctools()
-# Define bus and chip address
-bus = "1" 
-chip = "0x60" # address of the MPL sensor
+device = I2C()
+device.check_i2ctools()
 ######################################
 
 # Set to Altimeter with an OSR = 128 
-writeI2C(MPL3115_CTRL_REG1, "0xB8")
+device.writeI2C(MPL3115_CTRL_REG1, "0xB8")
 # Enable Data Flags in PT_DATA_CFG
-writeI2C(MPL3115_PT_DATA_CFG, "0x07")
+device.writeI2C(MPL3115_PT_DATA_CFG, "0x07")
 # Set Active (polling)
-writeI2C(MPL3115_CTRL_REG1, "0xB9")
+device.writeI2C(MPL3115_CTRL_REG1, "0xB9")
 
-# Read STATUS Register
-STA = readI2C(MPL3115_STATUS)
-
-# check if pressure or temperature are ready (both) [STATUS, 0x00 register]
-if (STA & 0x04) == 4:
-    # OUT_P
-    OUT_P_MSB = readI2C("0x01")
-    OUT_P_CSB = readI2C("0x02")
-    OUT_P_LSB = readI2C("0x04")
-    ## OUT_T
-    #OUT_T_MSB = readI2C(0x04)
-    #OUT_T_LSB = readI2C(0x05)
-
-    #treat the bits to get the altitude
-else:
-    pass
+while 1:
+    # Read STATUS Register
+    STA = device.readI2C(MPL3115_STATUS)
+    # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
+    if (int(STA,16) & 0x04) == 4:
+        # OUT_P
+        OUT_P_MSB = readI2C("0x01")
+        OUT_P_CSB = readI2C("0x02")
+        OUT_P_LSB = readI2C("0x04")
+        ## OUT_T
+        #OUT_T_MSB = readI2C(0x04)
+        #OUT_T_LSB = readI2C(0x05)
+        print OUT_P_MSB
+        print OUT_P_CSB
+        print OUT_P_LSB
+    
+        #treat the bits to get the altitude
+    else:
+        print "data not ready"
+        pass
