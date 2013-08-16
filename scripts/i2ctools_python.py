@@ -42,7 +42,7 @@ def writeI2C(register, value):
     p.stdin.write('Y\n')
     #return p.stdout.read().strip()
 
-def check_i2ctools()
+def check_i2ctools():
 	print ""
 	print "Checking if i2c-tools are installed:"
 	flag = 0
