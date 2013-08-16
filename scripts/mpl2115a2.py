@@ -52,9 +52,9 @@ while 1:
     # check if pressure or temperature are ready (both) [STATUS, 0x00 register]
     if (int(STA,16) & 0x04) == 4:
         # OUT_P
-        OUT_P_MSB = readI2C("0x01")
-        OUT_P_CSB = readI2C("0x02")
-        OUT_P_LSB = readI2C("0x04")
+        OUT_P_MSB = device.readI2C("0x01")
+        OUT_P_CSB = device.readI2C("0x02")
+        OUT_P_LSB = device.readI2C("0x04")
         ## OUT_T
         #OUT_T_MSB = readI2C(0x04)
         #OUT_T_LSB = readI2C(0x05)
