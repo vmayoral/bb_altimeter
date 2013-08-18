@@ -20,6 +20,6 @@ include_directories(include
     ${catkin_INCLUDE_DIRS}
 )
 
-install(PROGRAMS scripts/i2ctools_python.py scripts/mpl2115a2.py
+install(PROGRAMS scripts/i2ctools_python.py scripts/mpl2115a2.py scripts/test-mpl2115a2.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
